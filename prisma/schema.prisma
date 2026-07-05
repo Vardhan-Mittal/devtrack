@@ -20,8 +20,9 @@ model User {
 
   accounts      Account[]
   sessions      Session[]
-  contestStatus UserContestStatus[]
-  tasks         Task[]
+  contestStatus   UserContestStatus[]
+  hackathonStatus UserHackathonStatus[]
+  tasks           Task[]
   projects      Project[]
   reminderLogs  ReminderLog[]
 
@@ -97,17 +98,33 @@ model UserContestStatus {
   @@unique([userId, contestId])
 }
 
+model UserHackathonStatus {
+  id          String        @id @default(uuid())
+  userId      String
+  hackathonId String
+  intent      ContestIntent @default(NOT_REGISTERED)
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hackathon   Hackathon @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, hackathonId])
+}
+
 model Hackathon {
   id           String    @id @default(uuid())
   externalId   String    @unique
   platform     String    @default("UNSTOP")
   title        String
-  organization String?
+  organizer    String?
   deadline     DateTime
   startDate    DateTime?
+  endDate      DateTime?
   url          String
   prizePool    String?
+  teamSize     String?
+  isOnline     Boolean   @default(true)
   
+  statuses     UserHackathonStatus[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }

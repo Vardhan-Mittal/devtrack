@@ -1,41 +1,41 @@
 import { syncCodeforcesContests } from "./codeforces"
 import { syncLeetCodeContests } from "./leetcode"
+import { syncUnstopHackathons } from "./unstop"
 import { prisma } from "@/lib/prisma"
 
 /**
- * Orchestrates synchronization across all supported contest platforms
- * and purges contests that finished more than 48 hours ago.
+ * Orchestrates synchronization across all supported contest platforms & hackathons
+ * and purges items that finished more than 48 hours ago.
  */
 export async function syncAllContests() {
-  console.log("🚀 Starting global auto-sync for coding contests...")
+  console.log("🚀 Starting global auto-sync for coding contests & hackathons...")
   
-  const [cfResult, lcResult] = await Promise.all([
+  const [cfResult, lcResult, unstopResult] = await Promise.all([
     syncCodeforcesContests(),
     syncLeetCodeContests(),
+    syncUnstopHackathons(),
   ])
 
   // Cleanup: Delete contests whose start time + duration is more than 48 hours in the past
   const cleanupThreshold = new Date(Date.now() - 48 * 3600 * 1000)
   try {
-    const deleted = await prisma.contest.deleteMany({
+    await prisma.contest.deleteMany({
       where: {
         startTime: {
           lt: cleanupThreshold,
         },
       },
     })
-    if (deleted.count > 0) {
-      console.log(`🧹 Cleaned up ${deleted.count} expired historical contests.`)
-    }
   } catch (err: any) {
     console.error("⚠️ Cleanup error:", err.message)
   }
 
   return {
-    success: cfResult.success || lcResult.success,
+    success: cfResult.success || lcResult.success || unstopResult.success,
     results: {
       codeforces: cfResult,
       leetcode: lcResult,
+      unstop: unstopResult,
     },
     timestamp: new Date().toISOString(),
   }
