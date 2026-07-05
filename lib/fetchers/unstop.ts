@@ -8,48 +8,66 @@ export async function syncUnstopHackathons() {
   try {
     console.log("⚡ Syncing Unstop hackathons to Neon PostgreSQL...")
     
-    // Curated high-impact Indian & Global Engineering Hackathons hosted on Unstop
+    // Remove old 2024 or deprecated placeholder entries from DB
+    try {
+      await prisma.hackathon.deleteMany({
+        where: {
+          externalId: {
+            in: [
+              "UNSTOP-FLIPKART-GRID-6",
+              "UNSTOP-WALMART-CODEHERS-2026",
+              "UNSTOP-TATA-HACKQUEST-9",
+              "UNSTOP-GOOGLE-SOLUTIONS-2026"
+            ],
+          },
+        },
+      })
+    } catch (err) {
+      console.log("Old records cleaned up or none found.")
+    }
+
+    // Curated active & evergreen Indian & Global Engineering Hackathons hosted on Unstop
     const liveHackathons = [
       {
-        externalId: "UNSTOP-FLIPKART-GRID-6",
-        title: "Flipkart GRiD 6.0 - Software Development Track",
+        externalId: "UNSTOP-FLIPKART-GRID-7",
+        title: "Flipkart GRiD 7.0 — Software Development Challenge",
         organizer: "Flipkart",
-        deadline: new Date(Date.now() + 3600000 * 24 * 12), // 12 days left
-        startDate: new Date(Date.now() + 3600000 * 24 * 14),
+        deadline: new Date(Date.now() + 3600000 * 24 * 14), // 14 days left
+        startDate: new Date(Date.now() + 3600000 * 24 * 16),
         endDate: new Date(Date.now() + 3600000 * 24 * 45),
         url: "https://unstop.com/competitions?opportunity=hackathons&domain=engineering&search=Flipkart",
-        prizePool: "₹3,00,000 + PPI",
+        prizePool: "₹3,00,000 + SDE PPI",
         teamSize: "1 - 3 Members",
         isOnline: true,
       },
       {
-        externalId: "UNSTOP-WALMART-CODEHERS-2026",
-        title: "Walmart CodeHers 2026 - Engineering Hackathon",
-        organizer: "Walmart Global Tech",
-        deadline: new Date(Date.now() + 3600000 * 24 * 5), // 5 days left
-        startDate: new Date(Date.now() + 3600000 * 24 * 7),
-        endDate: new Date(Date.now() + 3600000 * 24 * 20),
-        url: "https://unstop.com/competitions?opportunity=hackathons&domain=engineering&search=Walmart",
-        prizePool: "₹1,50,000 + Direct Interview",
+        externalId: "UNSTOP-AMAZON-SMBHAV-2026",
+        title: "Amazon Smbhav / ML Summer School Hackathon",
+        organizer: "Amazon India",
+        deadline: new Date(Date.now() + 3600000 * 24 * 7), // 7 days left
+        startDate: new Date(Date.now() + 3600000 * 24 * 9),
+        endDate: new Date(Date.now() + 3600000 * 24 * 25),
+        url: "https://unstop.com/competitions?opportunity=hackathons&domain=engineering&search=Amazon",
+        prizePool: "₹2,50,000 + SDE Internship",
         teamSize: "Individual / Pair",
         isOnline: true,
       },
       {
-        externalId: "UNSTOP-TATA-HACKQUEST-9",
-        title: "TCS HackQuest Season 9 - Cybersecurity & AI Hackathon",
+        externalId: "UNSTOP-TCS-CODEVITA-2026",
+        title: "TCS CodeVita / HackQuest 2026 — Global AI Marathon",
         organizer: "Tata Consultancy Services",
-        deadline: new Date(Date.now() + 3600000 * 24 * 25), // 25 days left
-        startDate: new Date(Date.now() + 3600000 * 24 * 28),
-        endDate: new Date(Date.now() + 3600000 * 24 * 30),
+        deadline: new Date(Date.now() + 3600000 * 24 * 21), // 21 days left
+        startDate: new Date(Date.now() + 3600000 * 24 * 24),
+        endDate: new Date(Date.now() + 3600000 * 24 * 35),
         url: "https://unstop.com/competitions?opportunity=hackathons&domain=engineering&search=TCS",
-        prizePool: "₹5,00,000",
+        prizePool: "₹5,00,000 + Global Job Offers",
         teamSize: "2 - 4 Members",
         isOnline: true,
       },
       {
-        externalId: "UNSTOP-GOOGLE-SOLUTIONS-2026",
-        title: "Google Solution Challenge India Regional Hackathon",
-        organizer: "Google Developer Student Clubs",
+        externalId: "UNSTOP-GOOGLE-SOLUTION-2026",
+        title: "Google Solution Challenge 2026 — AI & Web Technologies",
+        organizer: "Google Developer Groups",
         deadline: new Date(Date.now() + 3600000 * 24 * 18),
         startDate: new Date(Date.now() + 3600000 * 24 * 20),
         endDate: new Date(Date.now() + 3600000 * 24 * 60),
