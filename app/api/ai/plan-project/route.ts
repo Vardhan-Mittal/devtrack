@@ -1,21 +1,18 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
+import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+    
+    let user = null
+    if (session?.user?.id) {
+      user = await prisma.user.findUnique({ where: { id: session.user.id } })
     }
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    })
-
-    if (!user) {
-      return NextResponse.json({ success: false, error: "User not found in database" }, { status: 404 })
+    if (!user && session?.user?.email) {
+      user = await prisma.user.findUnique({ where: { email: session.user.email } })
     }
 
     const body = await req.json()
@@ -114,10 +111,49 @@ export async function POST(req: Request) {
       ]
     }
 
-    // 1. Create the Project in database
-    const project = await prisma.project.create({
-      data: {
-        userId: user.id,
+    // If authenticated user found, save to PostgreSQL DB
+    if (user) {
+      const project = await prisma.project.create({
+        data: {
+          userId: user.id,
+          title,
+          description: `AI-Generated architectural roadmap for: "${prompt}"`,
+          status: "ONGOING",
+          techStack,
+          notes: `### 🏗️ Recommended Folder Structure\n${folderStructure.map((f) => `- \`${f}\``).join("\n")}\n\n### 🎯 Project Milestones\n${milestones.map((m) => `- ${m}`).join("\n")}`,
+          roadmap: {
+            folderStructure,
+            milestones,
+            generatedAt: new Date().toISOString(),
+          },
+          progress: 15,
+          deadline: new Date(Date.now() + 3600000 * 24 * 14),
+        },
+      })
+
+      const createdTasks = []
+      for (const taskTitle of tasksToCreate) {
+        const t = await prisma.task.create({
+          data: {
+            userId: user.id,
+            title: taskTitle,
+            priority: "HIGH",
+            dueDate: new Date(Date.now() + 3600000 * 24 * 3),
+          },
+        })
+        createdTasks.push(t)
+      }
+
+      return NextResponse.json({
+        success: true,
+        project,
+        createdTasks,
+        message: `Successfully generated roadmap for ${title} and added ${createdTasks.length} tasks to your sprint!`,
+      })
+    } else {
+      // Demo / Fallback mode when testing unauthenticated
+      const demoProject = {
+        id: `demo-${Date.now()}`,
         title,
         description: `AI-Generated architectural roadmap for: "${prompt}"`,
         status: "ONGOING",
@@ -129,30 +165,24 @@ export async function POST(req: Request) {
           generatedAt: new Date().toISOString(),
         },
         progress: 15,
-        deadline: new Date(Date.now() + 3600000 * 24 * 14), // 14 days default
-      },
-    })
+        deadline: new Date(Date.now() + 3600000 * 24 * 14),
+      }
 
-    // 2. Automatically create sprint tasks linked to this user
-    const createdTasks = []
-    for (const taskTitle of tasksToCreate) {
-      const t = await prisma.task.create({
-        data: {
-          userId: user.id,
-          title: taskTitle,
-          priority: "HIGH",
-          dueDate: new Date(Date.now() + 3600000 * 24 * 3), // 3 days due
-        },
+      const demoTasks = tasksToCreate.map((t, i) => ({
+        id: `demo-task-${i}-${Date.now()}`,
+        title: t,
+        priority: "HIGH",
+        completed: false,
+        dueDate: new Date(Date.now() + 3600000 * 24 * 3),
+      }))
+
+      return NextResponse.json({
+        success: true,
+        project: demoProject,
+        createdTasks: demoTasks,
+        message: `✨ [Demo Mode] Generated architectural roadmap for ${title} with ${demoTasks.length} sprint tasks! (Sign in to save to PostgreSQL)`,
       })
-      createdTasks.push(t)
     }
-
-    return NextResponse.json({
-      success: true,
-      project,
-      createdTasks,
-      message: `Successfully generated roadmap for ${title} and added ${createdTasks.length} tasks to your sprint!`,
-    })
   } catch (error: any) {
     console.error("AI Project Planner error:", error)
     return NextResponse.json({ success: false, error: error.message || "Failed to generate AI project plan" }, { status: 500 })
