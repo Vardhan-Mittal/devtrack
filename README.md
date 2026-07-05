@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 DevTrack — Your Coding Life, Organized
 
-## Getting Started
+A **developer-only productivity dashboard** that auto-tracks coding contests (Codeforces, LeetCode) and hackathons (Unstop), manages user-intent tracking with custom priority sorting algorithms, automates email reminders, and provides dedicated tools for software project portfolios and engineering todos.
 
-First, run the development server:
+---
 
+## 🌟 Core Features & Blueprint
+
+### 🏆 1. Automated Contest System (Codeforces & LeetCode)
+- **Zero Manual Entry**: Contests are automatically fetched from public platform APIs and stored in a shared PostgreSQL database.
+- **User-Intent Tracking**: Mark your status for any contest:
+  - ✅ **Registered** (High Priority)
+  - ⭐ **Interested** (Medium Priority)
+  - ❌ **Not Registered** (Default)
+- **Priority Dashboard Sorting**: The dashboard automatically groups contests by intent (`Registered` → `Interested` → `Not Registered`), ordering each group by the nearest upcoming countdown timer!
+
+### 🔥 2. Automated Hackathon Tracker (Unstop)
+- Auto-fetches live and upcoming hackathons from Unstop.
+- Calendar and list views highlighting registration deadlines and prize pools.
+
+### ⏰ 3. Automated Reminder Engine
+- Cron workers evaluate upcoming contest schedules against your custom preferences (e.g., reminding you 30 minutes before a Registered contest starts).
+- Powered by secure email notification integrations.
+
+### 🛠️ 4. Engineering Productivity Suite
+- **To-Do List**: Developer task management with priorities (`HIGH`, `MEDIUM`, `LOW`), due dates, and instant completion toggles.
+- **SDE Projects Tracker**: Organize personal and team repositories across `Planned`, `Ongoing`, and `Shipped` states with tech stack tags and GitHub links.
+
+---
+
+## 💻 Tech Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org) (App Router, Turbopack, Server Components)
+- **Database & ORM**: [PostgreSQL (Neon Serverless)](https://neon.tech) + [Prisma ORM v5](https://prisma.io)
+- **Authentication**: [NextAuth.js](https://next-auth.js.org) (Google OAuth with JWT session persistence)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com) + Lucide Icons + Dark Mode developer aesthetic
+
+---
+
+## 🛠️ Getting Started Locally
+
+### 1. Clone the repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Vardhan-Mittal/devtrack.git
+cd devtrack
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Configure Environment Variables (`.env`)
+Create a `.env` file in the root directory with your database connection and Google OAuth credentials:
+```env
+DATABASE_URL="postgresql://user:password@ep-[id]-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&pgbouncer=true"
+GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+NEXTAUTH_SECRET="your-random-secret-key"
+NEXTAUTH_URL="http://localhost:3000"
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Sync Database Schema
+```bash
+npx prisma db push
+```
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 5. Run Local Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the live SDE Command Center!

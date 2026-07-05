@@ -5,7 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-
 }
 
 model User {
@@ -14,12 +13,20 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  cfHandle      String?   // Optional Codeforces handle
+  lcUsername    String?   // Optional LeetCode username
+  remindersOn   Boolean   @default(true)
+  reminderMins  Int       @default(30) // Minutes before contest to remind
 
   accounts      Account[]
   sessions      Session[]
+  contestStatus UserContestStatus[]
+  tasks         Task[]
+  projects      Project[]
+  reminderLogs  ReminderLog[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Account {
@@ -28,12 +35,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String? @db.Text
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -56,4 +63,95 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Contest {
+  id          String    @id @default(uuid())
+  externalId  String    @unique // e.g. "CF-1980" or "LC-biweekly-130"
+  platform    String    // "CODEFORCES" or "LEETCODE"
+  title       String
+  startTime   DateTime
+  durationSec Int
+  url         String
+  
+  statuses    UserContestStatus[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum ContestIntent {
+  REGISTERED
+  INTERESTED
+  NOT_REGISTERED
+}
+
+model UserContestStatus {
+  id        String        @id @default(uuid())
+  userId    String
+  contestId String
+  intent    ContestIntent @default(NOT_REGISTERED)
+
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contest   Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, contestId])
+}
+
+model Hackathon {
+  id           String    @id @default(uuid())
+  externalId   String    @unique
+  platform     String    @default("UNSTOP")
+  title        String
+  organization String?
+  deadline     DateTime
+  startDate    DateTime?
+  url          String
+  prizePool    String?
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Task {
+  id        String    @id @default(uuid())
+  userId    String
+  title     String
+  completed Boolean   @default(false)
+  priority  String    @default("MEDIUM") // "HIGH", "MEDIUM", "LOW"
+  dueDate   DateTime?
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum ProjectStatus {
+  PLANNED
+  ONGOING
+  COMPLETED
+}
+
+model Project {
+  id          String        @id @default(uuid())
+  userId      String
+  title       String
+  description String?       @db.Text
+  status      ProjectStatus @default(PLANNED)
+  techStack   String[]      // e.g. ["Next.js", "Prisma", "Tailwind"]
+  repoUrl     String?
+  liveUrl     String?
+  notes       String?       @db.Text
+
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model ReminderLog {
+  id        String   @id @default(uuid())
+  userId    String
+  contestId String
+  sentAt    DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
