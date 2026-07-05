@@ -17,7 +17,7 @@ export async function syncUnstopHackathons() {
         deadline: new Date(Date.now() + 3600000 * 24 * 12), // 12 days left
         startDate: new Date(Date.now() + 3600000 * 24 * 14),
         endDate: new Date(Date.now() + 3600000 * 24 * 45),
-        url: "https://unstop.com/hackathons/flipkart-grid-60-software-development-track-flipkart-102400",
+        url: "https://unstop.com/competitions?opportunity=hackathons&domain=engineering&search=Flipkart",
         prizePool: "₹3,00,000 + PPI",
         teamSize: "1 - 3 Members",
         isOnline: true,
@@ -29,7 +29,7 @@ export async function syncUnstopHackathons() {
         deadline: new Date(Date.now() + 3600000 * 24 * 5), // 5 days left
         startDate: new Date(Date.now() + 3600000 * 24 * 7),
         endDate: new Date(Date.now() + 3600000 * 24 * 20),
-        url: "https://unstop.com/hackathons/walmart-codehers-2026",
+        url: "https://unstop.com/competitions?opportunity=hackathons&domain=engineering&search=Walmart",
         prizePool: "₹1,50,000 + Direct Interview",
         teamSize: "Individual / Pair",
         isOnline: true,
@@ -41,7 +41,7 @@ export async function syncUnstopHackathons() {
         deadline: new Date(Date.now() + 3600000 * 24 * 25), // 25 days left
         startDate: new Date(Date.now() + 3600000 * 24 * 28),
         endDate: new Date(Date.now() + 3600000 * 24 * 30),
-        url: "https://unstop.com/hackathons/tcs-hackquest-season-9",
+        url: "https://unstop.com/competitions?opportunity=hackathons&domain=engineering&search=TCS",
         prizePool: "₹5,00,000",
         teamSize: "2 - 4 Members",
         isOnline: true,
@@ -53,7 +53,7 @@ export async function syncUnstopHackathons() {
         deadline: new Date(Date.now() + 3600000 * 24 * 18),
         startDate: new Date(Date.now() + 3600000 * 24 * 20),
         endDate: new Date(Date.now() + 3600000 * 24 * 60),
-        url: "https://unstop.com/hackathons/google-solution-challenge",
+        url: "https://unstop.com/competitions?opportunity=hackathons&domain=engineering&search=Google",
         prizePool: "$10,000 USD + Mentorship",
         teamSize: "1 - 4 Members",
         isOnline: true,
