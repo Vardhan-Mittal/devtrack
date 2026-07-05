@@ -12,12 +12,14 @@ import {
   Settings, 
   LogOut, 
   Terminal,
-  Code2
+  Code2,
+  Calendar
 } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
 
 const navItems = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Calendar", href: "/calendar", icon: Calendar, badge: "NEW" },
   { name: "Contests", href: "/contests", icon: Trophy, badge: "CF/LC" },
   { name: "Hackathons", href: "/hackathons", icon: Flame, badge: "Unstop" },
   { name: "To-Do List", href: "/todo", icon: CheckSquare },

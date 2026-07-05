@@ -15,6 +15,8 @@ model User {
   image         String?
   cfHandle      String?   // Optional Codeforces handle
   lcUsername    String?   // Optional LeetCode username
+  unstopProfile String?   // Optional Unstop profile URL
+  githubUsername String?  // Optional GitHub username
   remindersOn   Boolean   @default(true)
   reminderMins  Int       @default(30) // Minutes before contest to remind
 
@@ -158,6 +160,9 @@ model Project {
   repoUrl     String?
   liveUrl     String?
   notes       String?       @db.Text
+  roadmap     Json?         // AI generated folder structure & milestones
+  deadline    DateTime?
+  progress    Int           @default(0) // 0 to 100%
 
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime      @default(now())

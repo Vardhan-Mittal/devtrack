@@ -2,13 +2,12 @@
 
 import React, { useEffect } from "react"
 import { signIn, useSession } from "next-auth/react"
-import { useRouter } from "next-auth/react"
-import { useRouter as useNextRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Terminal, ShieldCheck, Sparkles, ArrowRight, Github, Code2 } from "lucide-react"
 
 export default function LoginPage() {
   const { data: session, status } = useSession()
-  const router = useNextRouter()
+  const router = useRouter()
 
   // Auto-redirect to dashboard if already logged in
   useEffect(() => {

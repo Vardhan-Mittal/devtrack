@@ -172,6 +172,10 @@ export default function Navbar() {
         <div className="fixed inset-0 top-16 z-50 bg-[#0c0c0e] p-6 md:hidden border-t border-zinc-800">
           <nav className="flex flex-col gap-3 font-sans">
             <Link onClick={() => setMobileMenuOpen(false)} href="/" className="px-4 py-3 rounded-lg bg-zinc-900 text-white font-medium">Dashboard</Link>
+            <Link onClick={() => setMobileMenuOpen(false)} href="/calendar" className="px-4 py-3 rounded-lg hover:bg-zinc-900 text-emerald-400 font-medium flex items-center justify-between">
+              <span>Calendar</span>
+              <span className="text-[10px] font-mono bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded">NEW</span>
+            </Link>
             <Link onClick={() => setMobileMenuOpen(false)} href="/contests" className="px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-300">Contests (CF/LC)</Link>
             <Link onClick={() => setMobileMenuOpen(false)} href="/hackathons" className="px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-300">Hackathons (Unstop)</Link>
             <Link onClick={() => setMobileMenuOpen(false)} href="/todo" className="px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-300">To-Do List</Link>
