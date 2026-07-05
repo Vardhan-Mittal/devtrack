@@ -44,6 +44,12 @@ export default function DashboardHomePage() {
   const [recentHackathons, setRecentHackathons] = useState<any[]>([])
   const [codingStats, setCodingStats] = useState<any | null>(null)
   
+  // Inline profile login & extraction state
+  const [isEditingHandles, setIsEditingHandles] = useState(false)
+  const [inputLc, setInputLc] = useState("")
+  const [inputCf, setInputCf] = useState("")
+  const [extracting, setExtracting] = useState(false)
+  
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
   
@@ -96,7 +102,11 @@ export default function DashboardHomePage() {
       }
       if (codingRes.ok) {
         const cData = await codingRes.json()
-        if (cData.success) setCodingStats(cData)
+        if (cData.success) {
+          setCodingStats(cData)
+          if (cData.leetcode?.username && cData.leetcode.username !== "Not Connected") setInputLc(cData.leetcode.username)
+          if (cData.codeforces?.handle && cData.codeforces.handle !== "Not Connected") setInputCf(cData.codeforces.handle)
+        }
       }
     } catch (err) {
       console.error("Failed to load dashboard data")
@@ -126,6 +136,33 @@ export default function DashboardHomePage() {
       fetchContests()
       fetchDashboardData()
     }, 500)
+  }
+
+  const handleExtractStats = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setExtracting(true)
+    try {
+      const res = await fetch("/api/stats/coding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lcUsername: inputLc, cfHandle: inputCf }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.success) {
+          setCodingStats((prev: any) => ({
+            ...prev,
+            leetcode: data.leetcode,
+            codeforces: data.codeforces,
+          }))
+          setIsEditingHandles(false)
+        }
+      }
+    } catch (err) {
+      console.error("Extraction error", err)
+    } finally {
+      setExtracting(false)
+    }
   }
 
   const handleGenerateAiPlan = async (e: React.FormEvent) => {
@@ -251,11 +288,60 @@ export default function DashboardHomePage() {
                   </p>
                 </div>
               </div>
-              <Link href="/settings" className="text-[11px] font-mono text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-semibold bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/20">
-                <span>Configure Handles</span>
-                <ExternalLink className="h-3 w-3" />
-              </Link>
+              <button
+                onClick={() => setIsEditingHandles(!isEditingHandles)}
+                className="text-[11px] font-mono text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 px-3 py-1.5 rounded-xl border border-cyan-500/30 transition-all shadow-sm"
+              >
+                <span>{isEditingHandles ? "Close Profile Login" : "Connect Profiles"}</span>
+                <RefreshCw className={`h-3 w-3 ${extracting ? "animate-spin" : ""}`} />
+              </button>
             </div>
+
+            {/* Inline Profile Login & Live Extraction Form */}
+            {(isEditingHandles || (!codingStats?.leetcode?.isReal && !codingStats?.codeforces?.isReal)) && (
+              <form onSubmit={handleExtractStats} className="bg-gradient-to-r from-cyan-950/40 to-emerald-950/40 border border-cyan-500/40 rounded-2xl p-4 space-y-3 animate-in fade-in zoom-in duration-200">
+                <div className="flex items-center justify-between text-xs font-mono font-bold text-cyan-300">
+                  <span className="flex items-center gap-1.5">
+                    <Zap className="h-4 w-4 text-amber-400 animate-pulse" />
+                    <span>Live Profile Data Extraction</span>
+                  </span>
+                  <span className="text-[10px] font-normal text-zinc-400">Official GraphQL / REST sync</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+                  <div>
+                    <label className="block text-zinc-400 mb-1 text-[11px]">LeetCode Username</label>
+                    <input
+                      type="text"
+                      value={inputLc}
+                      onChange={(e) => setInputLc(e.target.value)}
+                      placeholder="e.g. your_leetcode_username"
+                      className="w-full bg-[#09090c] border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-zinc-400 mb-1 text-[11px]">Codeforces Handle</label>
+                    <input
+                      type="text"
+                      value={inputCf}
+                      onChange={(e) => setInputCf(e.target.value)}
+                      placeholder="e.g. your_codeforces_handle"
+                      className="w-full bg-[#09090c] border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[10px] font-mono text-zinc-400">No passwords stored. Only public read access.</span>
+                  <button
+                    type="submit"
+                    disabled={extracting}
+                    className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-mono font-extrabold text-xs uppercase flex items-center gap-1.5 transition-all shadow-md shadow-cyan-500/20"
+                  >
+                    {extracting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5 fill-current" />}
+                    <span>{extracting ? "Extracting Live Data..." : "Extract & Save Stats"}</span>
+                  </button>
+                </div>
+              </form>
+            )}
 
             {/* Total Solved Header */}
             <div className="flex items-center justify-between bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4">
@@ -263,14 +349,16 @@ export default function DashboardHomePage() {
                 <p className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Total Problems Solved</p>
                 <div className="flex items-baseline gap-2 mt-0.5 font-mono">
                   <span className="text-3xl font-extrabold text-white">
-                    {codingStats ? codingStats.leetcode.totalSolved + codingStats.codeforces.totalSolved : "1,932"}
+                    {codingStats ? (codingStats.leetcode?.totalSolved || 0) + (codingStats.codeforces?.totalSolved || 0) : "0"}
                   </span>
-                  <span className="text-xs text-emerald-400 font-bold">↑ Active Streak</span>
+                  {codingStats && ((codingStats.leetcode?.totalSolved || 0) + (codingStats.codeforces?.totalSolved || 0) > 0) && (
+                    <span className="text-xs text-emerald-400 font-bold">↑ Live Extracted</span>
+                  )}
                 </div>
               </div>
               <div className="text-right font-mono text-xs text-zinc-400 space-y-1">
-                <div>LC: <span className="text-amber-400 font-bold">{codingStats?.leetcode.totalSolved || 482}</span></div>
-                <div>CF: <span className="text-cyan-400 font-bold">{codingStats?.codeforces.totalSolved || 1450}</span></div>
+                <div>LC: <span className="text-amber-400 font-bold">{codingStats?.leetcode?.totalSolved || 0}</span></div>
+                <div>CF: <span className="text-cyan-400 font-bold">{codingStats?.codeforces?.totalSolved || 0}</span></div>
               </div>
             </div>
 
@@ -280,25 +368,25 @@ export default function DashboardHomePage() {
               <div className="p-3.5 rounded-2xl bg-[#111116] border border-amber-500/20 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono font-extrabold text-amber-400 uppercase tracking-wider">LeetCode</span>
-                  <span className="text-[10px] font-mono text-zinc-500">@{codingStats?.leetcode.username || "neal_wu"}</span>
+                  <span className="text-[10px] font-mono text-zinc-500 truncate max-w-[100px]">@{codingStats?.leetcode?.username || "Not Connected"}</span>
                 </div>
                 <div className="grid grid-cols-3 gap-1 text-center font-mono text-[10px]">
                   <div className="bg-zinc-900/90 p-1 rounded border border-zinc-800">
-                    <div className="text-emerald-400 font-bold">{codingStats?.leetcode.easySolved || 180}</div>
+                    <div className="text-emerald-400 font-bold">{codingStats?.leetcode?.easySolved || 0}</div>
                     <div className="text-zinc-500">Easy</div>
                   </div>
                   <div className="bg-zinc-900/90 p-1 rounded border border-zinc-800">
-                    <div className="text-amber-400 font-bold">{codingStats?.leetcode.mediumSolved || 240}</div>
+                    <div className="text-amber-400 font-bold">{codingStats?.leetcode?.mediumSolved || 0}</div>
                     <div className="text-zinc-500">Med</div>
                   </div>
                   <div className="bg-zinc-900/90 p-1 rounded border border-zinc-800">
-                    <div className="text-rose-400 font-bold">{codingStats?.leetcode.hardSolved || 62}</div>
+                    <div className="text-rose-400 font-bold">{codingStats?.leetcode?.hardSolved || 0}</div>
                     <div className="text-zinc-500">Hard</div>
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 pt-1 border-t border-zinc-800/80">
                   <span>Acceptance:</span>
-                  <span className="text-white font-bold">{codingStats?.leetcode.acceptanceRate || 71.2}%</span>
+                  <span className="text-white font-bold">{codingStats?.leetcode?.acceptanceRate || 0}%</span>
                 </div>
               </div>
 
@@ -306,21 +394,21 @@ export default function DashboardHomePage() {
               <div className="p-3.5 rounded-2xl bg-[#111116] border border-cyan-500/20 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono font-extrabold text-cyan-400 uppercase tracking-wider">Codeforces</span>
-                  <span className="text-[10px] font-mono text-zinc-500">@{codingStats?.codeforces.handle || "tourist"}</span>
+                  <span className="text-[10px] font-mono text-zinc-500 truncate max-w-[100px]">@{codingStats?.codeforces?.handle || "Not Connected"}</span>
                 </div>
                 <div className="bg-zinc-900/90 p-2 rounded-xl border border-zinc-800 flex items-center justify-between font-mono">
                   <div>
                     <div className="text-[10px] text-zinc-500 uppercase">Rating</div>
-                    <div className="text-lg font-extrabold text-cyan-300">{codingStats?.codeforces.rating || 3859}</div>
+                    <div className="text-lg font-extrabold text-cyan-300">{codingStats?.codeforces?.rating || 0}</div>
                   </div>
                   <div className="text-right">
                     <div className="text-[10px] text-zinc-500 uppercase">Max Rating</div>
-                    <div className="text-xs font-bold text-emerald-400">{codingStats?.codeforces.maxRating || 3979}</div>
+                    <div className="text-xs font-bold text-emerald-400">{codingStats?.codeforces?.maxRating || 0}</div>
                   </div>
                 </div>
                 <div className="text-center">
-                  <span className="inline-block px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-[10px] font-mono font-extrabold text-cyan-300 uppercase tracking-wider">
-                    {codingStats?.codeforces.rank || "legendary grandmaster"}
+                  <span className="inline-block px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-[10px] font-mono font-extrabold text-cyan-300 uppercase tracking-wider truncate max-w-full">
+                    {codingStats?.codeforces?.rank || "Unrated"}
                   </span>
                 </div>
               </div>
