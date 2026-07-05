@@ -27,6 +27,8 @@ export default function DashboardHomePage() {
     interested: ContestProps[]
     upcoming: ContestProps[]
   }>({ registered: [], interested: [], upcoming: [] })
+  const [recentTodos, setRecentTodos] = useState<any[]>([])
+  const [recentProjects, setRecentProjects] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
 
@@ -47,9 +49,29 @@ export default function DashboardHomePage() {
     }
   }
 
+  const fetchProductivityData = async () => {
+    try {
+      const [todosRes, projectsRes] = await Promise.all([
+        fetch("/api/todos"),
+        fetch("/api/projects")
+      ])
+      if (todosRes.ok) {
+        const tData = await todosRes.json()
+        if (tData.success) setRecentTodos((tData.tasks || []).slice(0, 3))
+      }
+      if (projectsRes.ok) {
+        const pData = await projectsRes.json()
+        if (pData.success) setRecentProjects((pData.projects || []).slice(0, 2))
+      }
+    } catch (err) {
+      console.error("Failed to load productivity data")
+    }
+  }
+
   useEffect(() => {
     fetchContests()
-  }, [])
+    fetchProductivityData()
+  }, [session])
 
   const handleManualSync = async () => {
     setSyncing(true)
@@ -87,7 +109,7 @@ export default function DashboardHomePage() {
               <span className="text-xs font-mono text-zinc-500">v0.2.0-beta</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Hey {session?.user?.name ? session.user.name.split(" ")[0] : "Vardhan"} 👋
+              Hey {session?.user?.name ? session.user.name.split(" ")[0] : "Developer"} 👋
             </h1>
             <p className="text-sm text-zinc-400 max-w-xl leading-relaxed">
               Welcome back. Your coding contests are auto-synced from Codeforces & LeetCode. 
@@ -100,7 +122,7 @@ export default function DashboardHomePage() {
             <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-3.5 text-center">
               <p className="text-[11px] font-mono uppercase text-zinc-500">Active Sprint</p>
               <p className="text-xl font-bold text-white mt-0.5 flex items-center justify-center gap-1">
-                <span>3</span>
+                <span>{recentTodos.length}</span>
                 <span className="text-xs text-emerald-400 font-mono">Tasks</span>
               </p>
             </div>
@@ -213,7 +235,7 @@ export default function DashboardHomePage() {
         )}
       </div>
 
-      {/* 🚀 QUICK PRODUCTIVITY FOOTER (TO-DO & PROJECTS PREVIEW) */}
+      {/* 🚀 QUICK PRODUCTIVITY FOOTER (DYNAMIC USER TO-DOS & PROJECTS) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-zinc-800">
         {/* To-Do Quick Card */}
         <div className="rounded-2xl border border-zinc-800 bg-[#0d0d10] p-6 space-y-4">
@@ -225,14 +247,26 @@ export default function DashboardHomePage() {
             <Link href="/todo" className="text-xs font-mono text-zinc-400 hover:text-white">View All →</Link>
           </div>
           <div className="space-y-2 font-mono text-xs">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/80 border border-zinc-800/80">
-              <span className="text-zinc-300">⚡ Codeforces & LeetCode API Sync</span>
-              <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">DONE</span>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/80 border border-zinc-800/80">
-              <span className="text-zinc-300">🔐 Implement Unstop Hackathon scraper</span>
-              <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">NEXT</span>
-            </div>
+            {recentTodos.length > 0 ? (
+              recentTodos.map((todo) => (
+                <div key={todo.id} className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/80 border border-zinc-800/80">
+                  <span className={`text-zinc-300 truncate max-w-[200px] sm:max-w-[260px] ${todo.completed ? "line-through text-zinc-500" : ""}`}>
+                    {todo.title}
+                  </span>
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                    todo.priority === "HIGH" ? "bg-red-500/20 text-red-300" :
+                    todo.priority === "MEDIUM" ? "bg-amber-500/20 text-amber-300" :
+                    "bg-emerald-500/20 text-emerald-300"
+                  }`}>
+                    {todo.priority}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="p-4 rounded-lg bg-zinc-900/40 border border-zinc-800/50 text-center text-zinc-500">
+                No active sprint tasks. Add one in <Link href="/todo" className="text-emerald-400 underline">To-Do List</Link>.
+              </div>
+            )}
           </div>
         </div>
 
@@ -246,20 +280,25 @@ export default function DashboardHomePage() {
             <Link href="/projects" className="text-xs font-mono text-zinc-400 hover:text-white">View All →</Link>
           </div>
           <div className="space-y-2">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/80 border border-zinc-800/80 text-xs">
-              <div>
-                <p className="font-semibold text-white">SnapScribe AI Image Caption</p>
-                <p className="text-[10px] font-mono text-zinc-500">React 19 • Vite • Hugging Face API</p>
+            {recentProjects.length > 0 ? (
+              recentProjects.map((proj) => (
+                <div key={proj.id} className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/80 border border-zinc-800/80 text-xs">
+                  <div className="truncate max-w-[200px] sm:max-w-[250px]">
+                    <p className="font-semibold text-white truncate">{proj.title}</p>
+                    <p className="text-[10px] font-mono text-zinc-500 truncate">
+                      {(proj.techStack || []).slice(0, 3).join(" • ")}
+                    </p>
+                  </div>
+                  <span className="px-2 py-1 rounded bg-cyan-500/20 text-cyan-400 font-mono text-[10px] whitespace-nowrap">
+                    {proj.status || "ACTIVE"}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="p-4 rounded-lg bg-zinc-900/40 border border-zinc-800/50 text-center text-zinc-500 text-xs font-mono">
+                No active projects tracked. Showcase your work in <Link href="/projects" className="text-cyan-400 underline font-sans">Projects</Link>.
               </div>
-              <span className="px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 font-mono text-[10px]">SHIPPED</span>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/80 border border-zinc-800/80 text-xs">
-              <div>
-                <p className="font-semibold text-white">DevTrack SDE Dashboard</p>
-                <p className="text-[10px] font-mono text-zinc-500">Next.js 16 • Prisma • Neon PostgreSQL</p>
-              </div>
-              <span className="px-2 py-1 rounded bg-amber-500/20 text-amber-400 font-mono text-[10px]">PHASE 2</span>
-            </div>
+            )}
           </div>
         </div>
       </div>
