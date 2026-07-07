@@ -37,6 +37,7 @@ export default function ContestCard({
   const [loading, setLoading] = useState(false)
   const [timeLeft, setTimeLeft] = useState("")
   const [isLive, setIsLive] = useState(false)
+  const [isFinished, setIsFinished] = useState(false)
 
   const platformUpper = (contest.platform || "").toUpperCase().trim()
   const titleLower = (contest.title || "").toLowerCase()
@@ -55,6 +56,7 @@ export default function ContestCard({
 
       if (now >= start && now <= end) {
         setIsLive(true)
+        setIsFinished(false)
         const diff = end - now
         const h = Math.floor(diff / 3600000)
         const m = Math.floor((diff % 3600000) / 60000)
@@ -62,6 +64,7 @@ export default function ContestCard({
         setTimeLeft(`LIVE! Ends in ${h}h ${m}m ${s}s`)
       } else if (now < start) {
         setIsLive(false)
+        setIsFinished(false)
         const diff = start - now
         const d = Math.floor(diff / 86400000)
         const h = Math.floor((diff % 86400000) / 3600000)
@@ -74,6 +77,7 @@ export default function ContestCard({
         }
       } else {
         setIsLive(false)
+        setIsFinished(true)
         setTimeLeft("Finished")
       }
     }
@@ -153,10 +157,10 @@ export default function ContestCard({
           <div className="flex flex-col sm:flex-row items-center gap-4 border border-zinc-800 bg-[#0e0e11] p-4 rounded-xl">
             <div className="text-center sm:text-left">
               <p className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">
-                {isLive ? "Status" : "Starts in"}
+                {isLive || isFinished ? "Status" : "Starts in"}
               </p>
               <p className={`text-2xl sm:text-3xl font-black font-mono tracking-tight ${
-                isLive ? "text-rose-400 animate-bounce" : "text-emerald-400 animate-pulse"
+                isLive ? "text-rose-400 animate-bounce" : isFinished ? "text-zinc-500" : "text-emerald-400 animate-pulse"
               }`}>
                 {timeLeft || "Calculating..."}
               </p>
@@ -216,8 +220,8 @@ export default function ContestCard({
         {/* Timing Details & Countdown */}
         <div className="mt-3 space-y-1.5 text-xs font-mono text-zinc-400">
           <div className="flex items-center justify-between p-2 rounded bg-zinc-900/80 border border-zinc-800">
-            <span className="text-[11px] text-zinc-500">{isLive ? "Status:" : "Countdown:"}</span>
-            <span className={`font-bold ${isLive ? "text-rose-400 animate-pulse" : "text-emerald-400"}`}>
+            <span className="text-[11px] text-zinc-500">{isLive || isFinished ? "Status:" : "Countdown:"}</span>
+            <span className={`font-bold ${isLive ? "text-rose-400 animate-pulse" : isFinished ? "text-zinc-500" : "text-emerald-400"}`}>
               {timeLeft || "Calculating..."}
             </span>
           </div>

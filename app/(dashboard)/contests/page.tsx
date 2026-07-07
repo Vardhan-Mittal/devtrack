@@ -50,6 +50,9 @@ export default function ContestsPage() {
   }
 
   const filteredContests = contests.filter((c) => {
+    const isFinished = new Date(c.startTime).getTime() + c.durationSec * 1000 < Date.now()
+    if (isFinished) return false
+
     const pUpper = (c.platform || "").toUpperCase().trim()
     const titleLower = (c.title || "").toLowerCase()
     const isCCContest = pUpper === "CODECHEF" || titleLower.includes("starters") || titleLower.includes("codechef")

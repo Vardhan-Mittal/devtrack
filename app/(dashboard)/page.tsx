@@ -194,7 +194,18 @@ export default function DashboardHomePage() {
     }
   }
 
-  const firstUpcoming = contests.length > 0 ? contests[0] : null
+  const nowTime = Date.now()
+  const activeContests = contests.filter(c => {
+    const end = new Date(c.startTime).getTime() + c.durationSec * 1000
+    return end > nowTime
+  })
+  const firstUpcoming = activeContests.length > 0 ? activeContests[0] : null
+
+  const activeGrouped = {
+    registered: (grouped?.registered || []).filter(c => new Date(c.startTime).getTime() + c.durationSec * 1000 > nowTime),
+    interested: (grouped?.interested || []).filter(c => new Date(c.startTime).getTime() + c.durationSec * 1000 > nowTime),
+    upcoming: (grouped?.upcoming || []).filter(c => new Date(c.startTime).getTime() + c.durationSec * 1000 > nowTime),
+  }
 
   return (
     <div className="space-y-8 pb-12 font-sans">
@@ -667,47 +678,49 @@ export default function DashboardHomePage() {
           </div>
         </div>
 
-        {!loading && contests.length > 0 && (
+        {!loading && activeContests.length > 0 && (
           <>
-            {grouped.registered.length > 0 && (
+            {activeGrouped.registered.length > 0 && (
               <div className="space-y-3">
                 <h4 className="text-xs font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
-                  <span>1. Registered Contests ({grouped.registered.length})</span>
+                  <span>1. Registered Contests ({activeGrouped.registered.length})</span>
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {grouped.registered.map((c) => (
+                  {activeGrouped.registered.map((c) => (
                     <ContestCard key={c.id} contest={c} onIntentChanged={handleIntentChanged} />
                   ))}
                 </div>
               </div>
             )}
 
-            {grouped.interested.length > 0 && (
+            {activeGrouped.interested.length > 0 && (
               <div className="space-y-3">
                 <h4 className="text-xs font-mono uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
                   <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                  <span>2. Interested Contests ({grouped.interested.length})</span>
+                  <span>2. Interested Contests ({activeGrouped.interested.length})</span>
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {grouped.interested.map((c) => (
+                  {activeGrouped.interested.map((c) => (
                     <ContestCard key={c.id} contest={c} onIntentChanged={handleIntentChanged} />
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="space-y-3">
-              <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5 text-zinc-500" />
-                <span>3. Upcoming Public Contests ({grouped.upcoming.length})</span>
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {grouped.upcoming.map((c) => (
-                  <ContestCard key={c.id} contest={c} onIntentChanged={handleIntentChanged} />
-                ))}
+            {activeGrouped.upcoming.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5 text-zinc-500" />
+                  <span>3. Upcoming Public Contests ({activeGrouped.upcoming.length})</span>
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {activeGrouped.upcoming.map((c) => (
+                    <ContestCard key={c.id} contest={c} onIntentChanged={handleIntentChanged} />
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </>
         )}
       </div>
