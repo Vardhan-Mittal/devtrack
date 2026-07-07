@@ -50,8 +50,19 @@ export default function ContestsPage() {
   }
 
   const filteredContests = contests.filter((c) => {
-    const matchesPlatform = filter === "ALL" || c.platform === filter
-    const matchesSearch = c.title.toLowerCase().includes(search.toLowerCase())
+    const pUpper = (c.platform || "").toUpperCase().trim()
+    const titleLower = (c.title || "").toLowerCase()
+    const isCCContest = pUpper === "CODECHEF" || titleLower.includes("starters") || titleLower.includes("codechef")
+    const isCFContest = pUpper === "CODEFORCES" || titleLower.includes("codeforces")
+    const isLCContest = !isCCContest && !isCFContest
+
+    const matchesPlatform =
+      filter === "ALL" ||
+      (filter === "CODEFORCES" && isCFContest) ||
+      (filter === "LEETCODE" && isLCContest) ||
+      (filter === "CODECHEF" && isCCContest)
+
+    const matchesSearch = (c.title || "").toLowerCase().includes(search.toLowerCase())
     return matchesPlatform && matchesSearch
   })
 

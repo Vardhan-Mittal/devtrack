@@ -38,8 +38,11 @@ export default function ContestCard({
   const [timeLeft, setTimeLeft] = useState("")
   const [isLive, setIsLive] = useState(false)
 
-  const isCF = contest.platform === "CODEFORCES"
-  const isCC = contest.platform === "CODECHEF"
+  const platformUpper = (contest.platform || "").toUpperCase().trim()
+  const titleLower = (contest.title || "").toLowerCase()
+  const isCF = platformUpper === "CODEFORCES" || titleLower.includes("codeforces")
+  const isCC = platformUpper === "CODECHEF" || titleLower.includes("starters") || titleLower.includes("codechef")
+  const platformLabel = isCF ? "Codeforces" : isCC ? "CodeChef" : "LeetCode"
   const isRegistered = intent === "REGISTERED"
   const isInterested = intent === "INTERESTED"
 
@@ -121,7 +124,7 @@ export default function ContestCard({
               <span className={`text-xs font-mono px-2 py-0.5 rounded font-bold uppercase border ${
                 isCF ? "bg-red-500/10 text-red-400 border-red-500/30" : isCC ? "bg-amber-700/10 text-amber-500 border-amber-700/30" : "bg-amber-500/10 text-amber-400 border-amber-500/30"
               }`}>
-                {contest.platform}
+                {platformLabel}
               </span>
               {isLive && (
                 <span className="animate-pulse px-2 py-0.5 rounded bg-rose-500 text-white text-[10px] font-bold uppercase font-mono">
@@ -189,7 +192,7 @@ export default function ContestCard({
           <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider border ${
             isCF ? "bg-red-500/10 text-red-400 border-red-500/30" : isCC ? "bg-amber-700/10 text-amber-500 border-amber-700/30" : "bg-amber-500/10 text-amber-400 border-amber-500/30"
           }`}>
-            {isCF ? "Codeforces" : isCC ? "CodeChef" : "LeetCode"}
+            {platformLabel}
           </span>
 
           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono ${

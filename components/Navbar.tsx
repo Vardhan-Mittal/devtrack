@@ -176,7 +176,7 @@ export default function Navbar() {
               <span>Calendar</span>
               <span className="text-[10px] font-mono bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded">NEW</span>
             </Link>
-            <Link onClick={() => setMobileMenuOpen(false)} href="/contests" className="px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-300">Contests (CF/LC)</Link>
+            <Link onClick={() => setMobileMenuOpen(false)} href="/contests" className="px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-300">Contests (CF/LC/CC)</Link>
             <Link onClick={() => setMobileMenuOpen(false)} href="/hackathons" className="px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-300">Hackathons (Unstop)</Link>
             <Link onClick={() => setMobileMenuOpen(false)} href="/todo" className="px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-300">To-Do List</Link>
             <Link onClick={() => setMobileMenuOpen(false)} href="/projects" className="px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-300">Projects Tracker</Link>

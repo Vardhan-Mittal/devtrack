@@ -265,7 +265,7 @@ export default function DashboardHomePage() {
             <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-3 text-center">
               <p className="text-[10px] font-mono uppercase text-zinc-500">Registered</p>
               <p className="text-lg font-bold text-emerald-400 mt-0.5 font-mono">
-                {aiSummary?.counts?.contests !== undefined ? aiSummary.counts.contests : grouped.registered.length} CF/LC
+                {aiSummary?.counts?.contests !== undefined ? aiSummary.counts.contests : grouped.registered.length} CF/LC/CC
               </p>
             </div>
           </div>

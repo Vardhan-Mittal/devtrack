@@ -20,7 +20,7 @@ import { signOut, useSession } from "next-auth/react"
 const navItems = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Calendar", href: "/calendar", icon: Calendar, badge: "NEW" },
-  { name: "Contests", href: "/contests", icon: Trophy, badge: "CF/LC" },
+  { name: "Contests", href: "/contests", icon: Trophy, badge: "CF/LC/CC" },
   { name: "Hackathons", href: "/hackathons", icon: Flame, badge: "Unstop" },
   { name: "To-Do List", href: "/todo", icon: CheckSquare },
   { name: "Projects", href: "/projects", icon: FolderGit2 },
