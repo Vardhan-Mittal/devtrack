@@ -15,6 +15,7 @@ model User {
   image         String?
   cfHandle      String?   // Optional Codeforces handle
   lcUsername    String?   // Optional LeetCode username
+  ccHandle      String?   // Optional CodeChef handle
   unstopProfile String?   // Optional Unstop profile URL
   githubUsername String?  // Optional GitHub username
   remindersOn   Boolean   @default(true)

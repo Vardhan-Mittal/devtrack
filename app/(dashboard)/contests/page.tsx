@@ -64,7 +64,7 @@ export default function ContestsPage() {
             <span>Contests Explorer</span>
           </h1>
           <p className="text-xs text-zinc-400 mt-1">
-            Auto-synced from Codeforces & LeetCode APIs. Toggle your registration status to prioritize on your home dashboard.
+            Auto-synced from Codeforces, LeetCode & CodeChef APIs. Toggle your registration status to prioritize on your home dashboard.
           </p>
         </div>
 
@@ -103,6 +103,14 @@ export default function ContestsPage() {
               }`}
             >
               LeetCode
+            </button>
+            <button
+              onClick={() => setFilter("CODECHEF")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-colors ${
+                filter === "CODECHEF" ? "bg-amber-700 text-white font-bold" : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              CodeChef
             </button>
           </div>
         </div>

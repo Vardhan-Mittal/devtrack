@@ -45,7 +45,7 @@ export default function LoginPage() {
         <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/50 p-4 text-left space-y-2.5">
           <div className="flex items-center gap-2.5 text-xs text-zinc-300 font-medium">
             <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
-            <span>Auto-sync Codeforces, LeetCode & Unstop contests</span>
+            <span>Auto-sync Codeforces, LeetCode, CodeChef & Unstop contests</span>
           </div>
           <div className="flex items-center gap-2.5 text-xs text-zinc-300 font-medium">
             <Sparkles className="h-4 w-4 text-cyan-400 shrink-0" />

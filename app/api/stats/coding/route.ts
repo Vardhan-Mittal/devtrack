@@ -2,9 +2,10 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { extractCodeChefStats } from "@/lib/fetchers/codechef"
 
 // Helper to extract real coding stats for given usernames
-async function extractCodingStats(lcUsername: string, cfHandle: string) {
+async function extractCodingStats(lcUsername: string, cfHandle: string, ccHandle: string) {
   // 1. LeetCode Stats Extraction
   let lcStats = {
     totalSolved: 0,
@@ -138,7 +139,10 @@ async function extractCodingStats(lcUsername: string, cfHandle: string) {
     }
   }
 
-  return { lcStats, cfStats }
+  // 3. CodeChef Stats Extraction
+  const ccStats = await extractCodeChefStats(ccHandle)
+
+  return { lcStats, cfStats, ccStats }
 }
 
 export async function GET(req: Request) {
@@ -146,6 +150,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)
     let lcUsername = searchParams.get("lc") || ""
     let cfHandle = searchParams.get("cf") || ""
+    let ccHandle = searchParams.get("cc") || ""
 
     const session = await getServerSession(authOptions)
     let user = null
@@ -175,10 +180,11 @@ export async function GET(req: Request) {
     if (user) {
       if (!lcUsername && user.lcUsername) lcUsername = user.lcUsername
       if (!cfHandle && user.cfHandle) cfHandle = user.cfHandle
+      if (!ccHandle && user.ccHandle) ccHandle = user.ccHandle
     }
 
     // Extract real stats (no fake fallbacks)
-    const { lcStats, cfStats } = await extractCodingStats(lcUsername, cfHandle)
+    const { lcStats, cfStats, ccStats } = await extractCodingStats(lcUsername, cfHandle, ccHandle)
 
     // Calculate Monthly Progress & Productivity Metrics
     const now = new Date()
@@ -196,7 +202,8 @@ export async function GET(req: Request) {
 
     // Monthly Progress Score out of 100
     const taskVelocityScore = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 40) : 30
-    const codingScore = Math.min(40, Math.round(((lcStats.totalSolved + cfStats.totalSolved) / 300) * 40))
+    const totalSolved = lcStats.totalSolved + cfStats.totalSolved + ccStats.solved
+    const codingScore = Math.min(40, Math.round((totalSolved / 300) * 40))
     const contestScore = Math.min(20, registeredContests * 7)
     const monthlyScore = Math.min(100, taskVelocityScore + codingScore + contestScore)
 
@@ -204,6 +211,7 @@ export async function GET(req: Request) {
       success: true,
       leetcode: lcStats,
       codeforces: cfStats,
+      codechef: ccStats,
       monthlyProgress: {
         score: monthlyScore,
         monthName: now.toLocaleString("default", { month: "long", year: "numeric" }),
@@ -214,7 +222,7 @@ export async function GET(req: Request) {
         activeProjects,
         completedProjects,
         registeredContests,
-        totalProblemsSolved: lcStats.totalSolved + cfStats.totalSolved,
+        totalProblemsSolved: totalSolved,
       },
     })
   } catch (error: any) {
@@ -225,7 +233,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const { lcUsername, cfHandle } = await req.json()
+    const { lcUsername, cfHandle, ccHandle } = await req.json()
     const session = await getServerSession(authOptions)
 
     // Save to PostgreSQL if logged in
@@ -234,12 +242,12 @@ export async function POST(req: Request) {
         if (session?.user?.id) {
           await prisma.user.update({
             where: { id: session.user.id },
-            data: { lcUsername: lcUsername || null, cfHandle: cfHandle || null },
+            data: { lcUsername: lcUsername || null, cfHandle: cfHandle || null, ccHandle: ccHandle || null },
           })
         } else if (session?.user?.email) {
           await prisma.user.update({
             where: { email: session.user.email },
-            data: { lcUsername: lcUsername || null, cfHandle: cfHandle || null },
+            data: { lcUsername: lcUsername || null, cfHandle: cfHandle || null, ccHandle: ccHandle || null },
           })
         }
       } catch (dbErr) {
@@ -248,12 +256,13 @@ export async function POST(req: Request) {
     }
 
     // Extract live stats immediately
-    const { lcStats, cfStats } = await extractCodingStats(lcUsername, cfHandle)
+    const { lcStats, cfStats, ccStats } = await extractCodingStats(lcUsername, cfHandle, ccHandle)
 
     return NextResponse.json({
       success: true,
       leetcode: lcStats,
       codeforces: cfStats,
+      codechef: ccStats,
     })
   } catch (error: any) {
     console.error("POST Coding stats error:", error)

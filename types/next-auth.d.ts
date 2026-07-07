@@ -7,6 +7,7 @@ declare module "next-auth" {
       id: string
       cfHandle?: string | null
       lcUsername?: string | null
+      ccHandle?: string | null
       unstopProfile?: string | null
       githubUsername?: string | null
       remindersOn?: boolean

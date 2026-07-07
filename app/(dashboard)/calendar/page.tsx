@@ -76,6 +76,7 @@ export default function CalendarPage() {
       case "green": return "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/30"
       case "blue": return "bg-cyan-500/20 text-cyan-300 border-cyan-500/30 hover:bg-cyan-500/30"
       case "orange": return "bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30"
+      case "brown": return "bg-amber-700/20 text-amber-400 border-amber-700/30 hover:bg-amber-700/30"
       case "purple": return "bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/30"
       default: return "bg-zinc-800 text-zinc-300 border-zinc-700"
     }

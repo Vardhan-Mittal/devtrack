@@ -42,6 +42,7 @@ export async function GET(req: Request) {
           { id: "demo-task-1", title: "[Task] Connect Codeforces API cron worker", date: new Date(now.getTime() + 86400000), type: "TASK", color: "green", priority: "HIGH" },
           { id: "demo-proj-1", title: "[Project] Twitter / X Full-Stack Clone", date: new Date(now.getTime() + 86400000 * 5), type: "PROJECT", color: "blue", status: "ONGOING" },
           { id: "demo-cont-1", title: "[Codeforces] Educational Codeforces Round 173", date: new Date(now.getTime() + 86400000 * 2), type: "CONTEST", color: "orange", intent: "REGISTERED" },
+          { id: "demo-cont-2", title: "[CodeChef] Starters 165 (Rated for All)", date: new Date(now.getTime() + 86400000 * 3), type: "CONTEST", color: "brown", intent: "INTERESTED" },
           { id: "demo-hack-1", title: "[Hackathon] Smart India Hackathon 2026", date: new Date(now.getTime() + 86400000 * 10), type: "HACKATHON", color: "purple" },
         ],
       })
@@ -77,7 +78,7 @@ export async function GET(req: Request) {
       }
     })
 
-    // 3. Contests (Orange 🟠)
+    // 3. Contests (Orange 🟠 & Brown 🟤)
     const allContests = await prisma.contest.findMany()
     allContests.forEach((c) => {
       const isReg = user.contestStatus.some((s) => s.contestId === c.id && s.intent === "REGISTERED")
@@ -87,7 +88,7 @@ export async function GET(req: Request) {
         title: `[${c.platform}] ${c.title}`,
         date: c.startTime,
         type: "CONTEST",
-        color: "orange",
+        color: c.platform === "CODECHEF" ? "brown" : "orange",
         url: c.url,
         intent: isReg ? "REGISTERED" : isInt ? "INTERESTED" : "PUBLIC",
       })

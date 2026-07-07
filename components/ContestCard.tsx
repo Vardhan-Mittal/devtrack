@@ -39,6 +39,7 @@ export default function ContestCard({
   const [isLive, setIsLive] = useState(false)
 
   const isCF = contest.platform === "CODEFORCES"
+  const isCC = contest.platform === "CODECHEF"
   const isRegistered = intent === "REGISTERED"
   const isInterested = intent === "INTERESTED"
 
@@ -118,7 +119,7 @@ export default function ContestCard({
                 Next Up
               </span>
               <span className={`text-xs font-mono px-2 py-0.5 rounded font-bold uppercase border ${
-                isCF ? "bg-red-500/10 text-red-400 border-red-500/30" : "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                isCF ? "bg-red-500/10 text-red-400 border-red-500/30" : isCC ? "bg-amber-700/10 text-amber-500 border-amber-700/30" : "bg-amber-500/10 text-amber-400 border-amber-500/30"
               }`}>
                 {contest.platform}
               </span>
@@ -186,9 +187,9 @@ export default function ContestCard({
         {/* Header: Platform badge & Intent Status */}
         <div className="flex items-center justify-between gap-2 mb-3">
           <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider border ${
-            isCF ? "bg-red-500/10 text-red-400 border-red-500/30" : "bg-amber-500/10 text-amber-400 border-amber-500/30"
+            isCF ? "bg-red-500/10 text-red-400 border-red-500/30" : isCC ? "bg-amber-700/10 text-amber-500 border-amber-700/30" : "bg-amber-500/10 text-amber-400 border-amber-500/30"
           }`}>
-            {isCF ? "Codeforces" : "LeetCode"}
+            {isCF ? "Codeforces" : isCC ? "CodeChef" : "LeetCode"}
           </span>
 
           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono ${

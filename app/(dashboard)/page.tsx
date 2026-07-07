@@ -48,6 +48,7 @@ export default function DashboardHomePage() {
   const [isEditingHandles, setIsEditingHandles] = useState(false)
   const [inputLc, setInputLc] = useState("")
   const [inputCf, setInputCf] = useState("")
+  const [inputCc, setInputCc] = useState("")
   const [extracting, setExtracting] = useState(false)
   
   const [loading, setLoading] = useState(true)
@@ -106,6 +107,7 @@ export default function DashboardHomePage() {
           setCodingStats(cData)
           if (cData.leetcode?.username && cData.leetcode.username !== "Not Connected") setInputLc(cData.leetcode.username)
           if (cData.codeforces?.handle && cData.codeforces.handle !== "Not Connected") setInputCf(cData.codeforces.handle)
+          if (cData.codechef?.handle && cData.codechef.handle !== "Not Connected") setInputCc(cData.codechef.handle)
         }
       }
     } catch (err) {
@@ -145,7 +147,7 @@ export default function DashboardHomePage() {
       const res = await fetch("/api/stats/coding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lcUsername: inputLc, cfHandle: inputCf }),
+        body: JSON.stringify({ lcUsername: inputLc, cfHandle: inputCf, ccHandle: inputCc }),
       })
       if (res.ok) {
         const data = await res.json()
@@ -154,6 +156,7 @@ export default function DashboardHomePage() {
             ...prev,
             leetcode: data.leetcode,
             codeforces: data.codeforces,
+            codechef: data.codechef,
           }))
           setIsEditingHandles(false)
         }
@@ -307,7 +310,7 @@ export default function DashboardHomePage() {
                   </span>
                   <span className="text-[10px] font-normal text-zinc-400">Official GraphQL / REST sync</span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
                   <div>
                     <label className="block text-zinc-400 mb-1 text-[11px]">LeetCode Username</label>
                     <input
@@ -325,6 +328,16 @@ export default function DashboardHomePage() {
                       value={inputCf}
                       onChange={(e) => setInputCf(e.target.value)}
                       placeholder="e.g. your_codeforces_handle"
+                      className="w-full bg-[#09090c] border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-zinc-400 mb-1 text-[11px]">CodeChef Handle</label>
+                    <input
+                      type="text"
+                      value={inputCc}
+                      onChange={(e) => setInputCc(e.target.value)}
+                      placeholder="e.g. your_codechef_handle"
                       className="w-full bg-[#09090c] border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
                     />
                   </div>
@@ -349,7 +362,7 @@ export default function DashboardHomePage() {
                 <p className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Total Problems Solved</p>
                 <div className="flex items-baseline gap-2 mt-0.5 font-mono">
                   <span className="text-3xl font-extrabold text-white">
-                    {codingStats ? (codingStats.leetcode?.totalSolved || 0) + (codingStats.codeforces?.totalSolved || 0) : "0"}
+                    {codingStats ? (codingStats.leetcode?.totalSolved || 0) + (codingStats.codeforces?.totalSolved || 0) + (codingStats.codechef?.solved || 0) : "0"}
                   </span>
                   {codingStats && ((codingStats.leetcode?.totalSolved || 0) + (codingStats.codeforces?.totalSolved || 0) > 0) && (
                     <span className="text-xs text-emerald-400 font-bold">↑ Live Extracted</span>
@@ -359,11 +372,12 @@ export default function DashboardHomePage() {
               <div className="text-right font-mono text-xs text-zinc-400 space-y-1">
                 <div>LC: <span className="text-amber-400 font-bold">{codingStats?.leetcode?.totalSolved || 0}</span></div>
                 <div>CF: <span className="text-cyan-400 font-bold">{codingStats?.codeforces?.totalSolved || 0}</span></div>
+                <div>CC: <span className="text-amber-600 font-bold">{codingStats?.codechef?.solved || 0}</span></div>
               </div>
             </div>
 
             {/* Platform Breakdowns */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {/* LeetCode Box */}
               <div className="p-3.5 rounded-2xl bg-[#111116] border border-amber-500/20 space-y-2.5">
                 <div className="flex items-center justify-between">
@@ -409,6 +423,29 @@ export default function DashboardHomePage() {
                 <div className="text-center">
                   <span className="inline-block px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-[10px] font-mono font-extrabold text-cyan-300 uppercase tracking-wider truncate max-w-full">
                     {codingStats?.codeforces?.rank || "Unrated"}
+                  </span>
+                </div>
+              </div>
+
+              {/* CodeChef Box */}
+              <div className="p-3.5 rounded-2xl bg-[#111116] border border-amber-600/20 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-extrabold text-amber-500 uppercase tracking-wider">CodeChef</span>
+                  <span className="text-[10px] font-mono text-zinc-500 truncate max-w-[100px]">@{codingStats?.codechef?.handle || "Not Connected"}</span>
+                </div>
+                <div className="bg-zinc-900/90 p-2 rounded-xl border border-zinc-800 flex items-center justify-between font-mono">
+                  <div>
+                    <div className="text-[10px] text-zinc-500 uppercase">Rating</div>
+                    <div className="text-lg font-extrabold text-amber-400">{codingStats?.codechef?.rating || 0}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[10px] text-zinc-500 uppercase">Solved</div>
+                    <div className="text-xs font-bold text-emerald-400">{codingStats?.codechef?.solved || 0}</div>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <span className="inline-block px-2 py-0.5 rounded-md bg-amber-600/10 border border-amber-600/30 text-[10px] font-mono font-extrabold text-amber-500 uppercase tracking-wider truncate max-w-full">
+                    {codingStats?.codechef?.stars || "Unrated"}
                   </span>
                 </div>
               </div>

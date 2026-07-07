@@ -1,5 +1,6 @@
 import { syncCodeforcesContests } from "./codeforces"
 import { syncLeetCodeContests } from "./leetcode"
+import { syncCodeChefContests } from "./codechef"
 import { syncUnstopHackathons } from "./unstop"
 import { prisma } from "@/lib/prisma"
 
@@ -10,9 +11,10 @@ import { prisma } from "@/lib/prisma"
 export async function syncAllContests() {
   console.log("🚀 Starting global auto-sync for coding contests & hackathons...")
   
-  const [cfResult, lcResult, unstopResult] = await Promise.all([
+  const [cfResult, lcResult, ccResult, unstopResult] = await Promise.all([
     syncCodeforcesContests(),
     syncLeetCodeContests(),
+    syncCodeChefContests(),
     syncUnstopHackathons(),
   ])
 
@@ -31,10 +33,11 @@ export async function syncAllContests() {
   }
 
   return {
-    success: cfResult.success || lcResult.success || unstopResult.success,
+    success: cfResult.success || lcResult.success || ccResult.success || unstopResult.success,
     results: {
       codeforces: cfResult,
       leetcode: lcResult,
+      codechef: ccResult,
       unstop: unstopResult,
     },
     timestamp: new Date().toISOString(),

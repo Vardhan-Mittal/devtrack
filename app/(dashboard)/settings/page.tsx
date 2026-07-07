@@ -6,6 +6,7 @@ import { Settings, Bell, Save, Shield, Terminal } from "lucide-react"
 export default function SettingsPage() {
   const [cfHandle, setCfHandle] = useState("Vardhan-Mittal")
   const [lcUsername, setLcUsername] = useState("Vardhan-Mittal")
+  const [ccHandle, setCcHandle] = useState("")
   const [remindersOn, setRemindersOn] = useState(true)
   const [reminderMins, setReminderMins] = useState(30)
   const [saved, setSaved] = useState(false)
@@ -35,7 +36,7 @@ export default function SettingsPage() {
             <Terminal className="h-4 w-4 text-emerald-400" />
             <span>Contest Platform Handles</span>
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-mono text-zinc-400">Codeforces Handle</label>
               <input
@@ -53,6 +54,16 @@ export default function SettingsPage() {
                 value={lcUsername}
                 onChange={(e) => setLcUsername(e.target.value)}
                 placeholder="e.g. neetcode"
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-mono text-zinc-400">CodeChef Handle</label>
+              <input
+                type="text"
+                value={ccHandle}
+                onChange={(e) => setCcHandle(e.target.value)}
+                placeholder="e.g. gennady.korotkevich"
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-500"
               />
             </div>

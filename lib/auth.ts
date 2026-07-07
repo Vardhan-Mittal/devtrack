@@ -47,6 +47,7 @@ export const authOptions: NextAuthOptions = {
             select: {
               cfHandle: true,
               lcUsername: true,
+              ccHandle: true,
               unstopProfile: true,
               githubUsername: true,
               remindersOn: true,
